@@ -23,7 +23,11 @@ export function BannerCarousel({ banners }: Props) {
   }, [banners.length]);
 
   const banner = banners[index];
-  if (!banner) return null;
+  if (!banners.length) {
+    return (
+      <div className="w-full aspect-[16/9] rounded-xl bg-[#0d061a] animate-pulse" />
+    );
+  }
 
   return (
     <div className="w-full">
@@ -64,12 +68,16 @@ function DefaultBanner({ banner }: { banner: Banner }) {
     <>
       {banner.image ? (
         <Image
-          src={banner.image}
-          alt={banner.title || `${banner.type} banner`}
-          fill
-          priority
-          className="object-cover"
-        />
+        src={banner.image}
+        alt={banner.title || `${banner.type} banner`}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover transition-opacity duration-500 opacity-0"
+        onLoadingComplete={(img) => {
+          img.style.opacity = "1";
+        }}
+      />
       ) : (
         <div className="absolute inset-0 bg-[#0d061a]" />
       )}

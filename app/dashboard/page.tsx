@@ -135,7 +135,7 @@ season = instance;
             </p>
 
             <Tooltip
-              title="Settled Tickets"
+              title="Tickets"
               content="The total number of completed tickets that count toward your performance in the current season."
               />
           </div>
@@ -168,7 +168,7 @@ season = instance;
 
             <div className="relative flex items-center">
             <Tooltip
-              title="Discipline Score"
+              title="Discipline"
               content="Measures how well you follow the rules, maintain consistency, and stay disciplined throughout the season."
               direction="left"
            />
