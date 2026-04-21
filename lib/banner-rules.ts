@@ -1,4 +1,4 @@
-import { banners } from "./banners"
+import { staticBanners as banners } from "@/lib/banners"
 
 export function getActiveBanner({
   user,
