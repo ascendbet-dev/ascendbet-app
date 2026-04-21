@@ -49,18 +49,32 @@ export default async function HomePage() {
     date: m.commence_time || m.date, // normalize date only
   })).slice(0, 20) || [];
 
-  const { data: winningBets } = await supabase
-    .from("tickets")
-    .select(`
-      potential_return,
-      created_at,
-      profiles!tickets_user_id_fkey (
-        username
-      )
-    `)
-    .eq("status", "won")
-    .order("created_at", { ascending: false })
-    .limit(5);
+/* ---------------- WINNING BETS (FIXED) ---------------- */
+
+const { data: winningBetsRaw } = await supabase
+  .from("tickets")
+  .select("user_id, potential_return, created_at")
+  .eq("status", "won")
+  .order("created_at", { ascending: false })
+  .limit(10);
+
+const userIds = winningBetsRaw?.map((b) => b.user_id) || [];
+
+const { data: profiles } = await supabase
+  .from("profiles")
+  .select("id, username")
+  .in("id", userIds);
+
+const formattedWinningBets =
+  winningBetsRaw?.map((bet) => {
+    const profile = profiles?.find((p) => p.id === bet.user_id);
+
+    return {
+      username: profile?.username ?? "User",
+      profit: bet.potential_return,
+      created_at: bet.created_at,
+    };
+  }) || [];
 
     /* ---------------- SEASON ---------------- */
 
@@ -83,13 +97,6 @@ export default async function HomePage() {
       players: instances?.length || 0,
     };
     }
-
-  const formattedWinningBets =
-    winningBets?.map((bet: any) => ({
-      username: bet.profiles?.username ?? "User",
-      profit: bet.potential_return,
-      created_at: bet.created_at,
-    })) || [];
 
     const { data: profile } = userId
     ? await supabase

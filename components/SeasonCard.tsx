@@ -12,7 +12,11 @@ export default function SeasonCard({ season, referralCode }: any) {
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    setNow(new Date());
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+  
+    return () => clearInterval(interval);
   }, []);
 
   if (!now) return null;
@@ -57,6 +61,15 @@ export default function SeasonCard({ season, referralCode }: any) {
       console.log("SHARE ERROR:", err);
     }
   };
+
+  const totalDuration = end.getTime() - start.getTime();
+  const elapsed = now.getTime() - start.getTime();
+
+  let progress = 0;
+
+  if (now < start) progress = 0;
+  else if (now > end) progress = 100;
+  else progress = (elapsed / totalDuration) * 100;
 
   return (
     <div className="relative rounded-2xl p-[1px]
@@ -118,9 +131,9 @@ export default function SeasonCard({ season, referralCode }: any) {
         {/* 🔥 PROGRESS BAR (season life) */}
         <div className="relative z-10">
           <div className="h-[3px] bg-white/10 rounded-full overflow-hidden relative">
-            <div
-              className="h-full bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400"
-              style={{ width: `${season.fillPercentage || 40}%` }}
+          <div
+              className="h-full bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 transition-[width] duration-700 ease-out"
+              style={{ width: `${progress}%` }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-30" />
           </div>

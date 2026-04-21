@@ -134,11 +134,11 @@ season = instance;
         <div className="border-r border-border px-2 py-2 text-center">
         <div className="flex items-center justify-center gap-1 relative">
             <p className="text-[10px] uppercase tracking-wider text-muted">
-              Settled tickets
+              tickets
             </p>
 
             <Tooltip
-              title="Tickets"
+              title="Settled Tickets"
               content="The total number of completed tickets that count toward your performance in the current season."
               />
           </div>
@@ -166,12 +166,12 @@ season = instance;
         <div className="px-2 py-2 text-center min-w-0">
         <div className="flex items-center justify-center gap-1">
             <p className="text-[10px] uppercase tracking-wider text-muted">
-              Discipline Score
+              Discipline
             </p>
 
             <div className="relative flex items-center">
             <Tooltip
-              title="Discipline"
+              title="Discipline Score"
               content="Measures how well you follow the rules, maintain consistency, and stay disciplined throughout the season."
               direction="left"
            />
