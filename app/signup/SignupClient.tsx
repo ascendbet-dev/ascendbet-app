@@ -204,7 +204,18 @@ export default function SignupPage() {
 
             <input type="text" placeholder="First Name" value={firstName} required onChange={(e) => setFirstName(e.target.value)} className="input" />
             <input type="text" placeholder="Last Name" value={lastName} required onChange={(e) => setLastName(e.target.value)} className="input" />
-            <input type="date" value={dob} required onChange={(e) => setDob(e.target.value)} className="input" />
+            <div className="relative">
+              <input
+                type="date"
+                value={dob}
+                required
+                onChange={(e) => setDob(e.target.value)}
+                className="input"
+              />
+              <span className="absolute left-3 top-1 text-[10px] text-muted">
+                Date of Birth
+              </span>
+            </div>
 
             <input type="email" placeholder="Email" value={email} required onChange={(e) => setEmail(e.target.value)} className="input" />
 
