@@ -10,7 +10,10 @@ import { PlayModes } from "@/components/PlayModes";
 import SeasonCard from "@/components/SeasonCard";
 
 function formatBalance(n: number) {
-  return `₦${n.toLocaleString()}`;
+  return `₦${n.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
 }
 
 export default async function HomePage() {
@@ -31,7 +34,7 @@ export default async function HomePage() {
   );
 
   const { leaderboard } = await leaderboardRes.json();
-  const top20 = leaderboard?.slice(0, 20) || [];
+  const top10 = leaderboard?.slice(0, 10) || [];
 
   const matchesRes = await fetch(
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/get-odds`,
@@ -157,7 +160,7 @@ export default async function HomePage() {
               POS
             </SlantedBlock>
 
-            <SlantedBlock variant="header" className="flex-1">
+            <SlantedBlock variant="header" className="w-[110px]">
               PLAYER
             </SlantedBlock>
 
@@ -175,7 +178,7 @@ export default async function HomePage() {
 
           </div>
 
-          {top20.map((row: any) => {
+          {top10.map((row: any) => {
             const name =
               row.username.charAt(0).toUpperCase() +
               row.username.slice(1).toLowerCase();
@@ -205,7 +208,7 @@ export default async function HomePage() {
                   {row.rank}
                 </SlantedBlock>
 
-                <SlantedBlock className="flex-1 text-center">
+                <SlantedBlock className="w-[110px] text-center truncate">
                   {name}
                 </SlantedBlock>
 

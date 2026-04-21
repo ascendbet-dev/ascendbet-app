@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import { Info } from "lucide-react";
 
 function formatBalance(n: number) {
-  return `₦${n.toLocaleString()}`;
+  return `₦${n.toLocaleString("en-NG", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
 }
 
 export default function CapitalBlock({

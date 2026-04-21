@@ -5,7 +5,10 @@ import { SlantedBlock } from "@/components/SlantedBlock";
 /* ---------------- HELPERS ---------------- */
 
 function formatBalance(n: number) {
-  return `₦${n.toLocaleString()}`;
+  return `₦${n.toLocaleString("en-NG", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
 }
 
 function formatName(name: string) {
@@ -14,9 +17,9 @@ function formatName(name: string) {
 
 function getMovementIcon(movement?: number) {
   if (movement === undefined || movement === null) return "—";
-  if (movement > 0) return `↑ ${movement}`;
-  if (movement < 0) return `↓ ${Math.abs(movement)}`;
-  return "—";
+  if (movement > 0) return "▲";
+  if (movement < 0) return "▼";
+  return "—"; // 👈 handles 0
 }
 
 function getMovementColor(movement?: number) {
@@ -91,7 +94,7 @@ export default async function LeaderboardPage() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="mx-auto max-w-lg h-[calc(100vh-120px)] px-4 py-4 flex flex-col">
+    <div className="mx-auto max-w-lg h-[calc(100vh-100px)] px-4 py-4 flex flex-col">
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4 shrink-0">
@@ -170,14 +173,14 @@ export default async function LeaderboardPage() {
       {/* LABELS */}
       <div className="flex items-center gap-2 mb-3 shrink-0">
         <SlantedBlock variant="header" className="w-[40px]">POS</SlantedBlock>
-        <SlantedBlock variant="header" className="flex-1">PLAYER</SlantedBlock>
+        <SlantedBlock variant="header" className="w-[110px]">PLAYER</SlantedBlock>
         <SlantedBlock variant="header" className="w-[90px]">BALANCE</SlantedBlock>
         <SlantedBlock variant="header" className="w-[60px]">SCORE</SlantedBlock>
         <SlantedBlock variant="header" className="w-[90px]">BADGE</SlantedBlock>
       </div>
 
       {/* REST */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide scroll-smooth will-change-scroll">
         {rest.map((row: any) => {
 
           const isCurrentUser = row.username === username;
@@ -203,21 +206,23 @@ export default async function LeaderboardPage() {
           return (
             <div
               key={row.rank}
-              className={`flex items-center gap-2 ${
-                isCurrentUser ? "bg-accent/10 px-2 py-1 rounded-lg" : ""
+              className={`flex items-center gap-2 px-2 py-1 rounded-lg ${
+                isCurrentUser ? "bg-accent/10" : ""
               }`}
             >
-              <SlantedBlock className="w-[40px] text-center">
-                <div className="flex flex-col items-center">
-                  <span>{row.rank}</span>
-                  <span className={`text-[10px] ${getMovementColor(row.movement)}`}>
+              <SlantedBlock className="w-[30px] text-center !px-1 !py-1">
+                <div className="flex flex-col items-center justify-center leading-none">
+                  <span className="text-xs font-semibold">{row.rank}</span>
+                  <span className={`text-[8px] ${getMovementColor(row.movement)}`}>
                     {getMovementIcon(row.movement)}
                   </span>
                 </div>
               </SlantedBlock>
 
-              <SlantedBlock className="flex-1 text-center">
+              <SlantedBlock className="w-[110px] text-center truncate">
+              <div className="truncate">
                 {formatName(row.username)}
+              </div>
               </SlantedBlock>
 
               <SlantedBlock className={`w-[90px] text-center ${balanceColor}`}>

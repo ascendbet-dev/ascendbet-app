@@ -7,10 +7,11 @@ import CapitalBlock from "@/components/CapitalBlock";
 import Tooltip from "@/components/ui/Tooltip";
 import { StatusBadge } from "@/components/StatusBadge";
 
-
-
 function formatBalance(n: number) {
-  return `₦${n.toLocaleString()}`;
+  return `₦${n.toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
 }
 
 
