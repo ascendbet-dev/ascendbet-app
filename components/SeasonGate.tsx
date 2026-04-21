@@ -189,5 +189,6 @@ async function joinSeason(router: any, setJoining: any) {
   }
 
   // 🔥 FORCE FULL STATE RESET
-  window.location.reload();
+  await new Promise((res) => setTimeout(res, 500));
+  router.refresh();
 }
