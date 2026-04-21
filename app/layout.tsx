@@ -14,9 +14,31 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "AscendBet Season 0",
-  description: "Performance-based betting discipline challenge",
+export const metadata = {
+  title: "AscendBet",
+  description: "Compete. Climb. Dominate the leaderboard.",
+  
+  openGraph: {
+    title: "AscendBet",
+    description: "Compete. Climb. Dominate the leaderboard.",
+    url: "https://app.joinascendbet.com",
+    siteName: "AscendBet",
+    images: [
+      {
+        url: "https://app.joinascendbet.com/ascendbet-preview.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "AscendBet",
+    description: "Compete. Climb. Dominate the leaderboard.",
+    images: ["https://app.joinascendbet.com/ascendbet-preview.png"],
+  },
 };
 
 export default function RootLayout({
