@@ -1,0 +1,50 @@
+export const TOP_LEAGUES = [
+  "Premier League",
+  "La Liga",
+  "Bundesliga",
+  "Serie A",
+  "Ligue 1",
+  "UEFA Champions League",
+  "Europa League",
+  "Conference League",
+  "MLS",
+] as const;
+
+export const COUNTRY_LEAGUES: Record<string, string[]> = {
+  England: [
+    "Premier League",
+    "Championship",
+    "League One",
+    "League Two",
+    "FA Cup",
+    "EFL Cup",
+  ],
+  Belgium: ["Belgian Pro League", "Belgian Cup"],
+  Brazil: ["Campeonato Brasileiro Série A"],
+  Denmark: ["Superliga", "DBU Pokalen"],
+  France: ["Ligue 1", "Coupe de France"],
+  Germany: ["Bundesliga", "DFB-Pokal"],
+  International: [
+    "FIFA World Cup",
+    "UEFA Nations League",
+    "UEFA European Championship",
+    "International Friendlies",
+    "World Cup Qualification",
+    "CAF World Cup Qualification",
+    "CONMEBOL World Cup Qualification",
+    "AFC World Cup Qualification",
+  ],
+  "International Clubs": ["UEFA Champions League", "Europa League", "Conference League"],
+  "International Youth": ["UEFA U21", "UEFA U19"],
+  Israel: ["Ligat ha'Al", "State Cup"],
+  Italy: ["Serie A", "Coppa Italia"],
+  Netherlands: ["Eredivisie", "Eerste Divisie"],
+  Portugal: ["Primeira Liga", "Taça de Portugal"],
+  "Saudi Arabia": ["Saudi Pro League", "King Cup"],
+  Spain: ["La Liga", "Copa del Rey"],
+  Switzerland: ["Super League", "Swiss Cup"],
+  Turkiye: ["Süper Lig", "Turkish Cup"],
+  USA: ["MLS", "US Open Cup"],
+};
+
+export const COUNTRIES = Object.keys(COUNTRY_LEAGUES) as string[];

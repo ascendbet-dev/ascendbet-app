@@ -1,26 +1,249 @@
 @import "tailwindcss";
 
+/* ASCENDBET DESIGN SYSTEM – tokens only, no hardcoded colors in components */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background */
+  --bg-primary: #0f0a1f;
+
+  /* Accent */
+  --accent-primary: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.4);
+
+  /* Surface */
+  --surface-card: rgba(255, 255, 255, 0.05);
+  --surface-border: rgba(255, 255, 255, 0.1);
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-success: #34d399;
+  --text-danger: #f87171;
+
+  /* Elevation */
+  --shadow-glow: 0 0 25px rgba(124, 58, 237, 0.4);
+
+  /* Motion */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 300ms;
+  --ease: ease-in-out;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg-primary: var(--bg-primary);
+  --color-accent: var(--accent-primary);
+  --color-surface: var(--surface-card);
+  --color-border: var(--surface-border);
+  --color-text: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-success: var(--text-success);
+  --color-danger: var(--text-danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --shadow-glow: var(--shadow-glow);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.input{
+  @apply w-full rounded-xl border border-border bg-bg-primary px-4 py-3 text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Remove number input arrows */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+
+input[type="number"]{
+  -moz-appearance:textfield;
+}
+
+html, body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.dropdown-scroll {
+  scrollbar-width: none;
+}
+
+.dropdown-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body.hide-footer nav {
+  display: none;
+}
+
+.odds-btn {
+  width: 50px;
+  height: 36px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.15s ease;
+}
+
+.odds-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
+@keyframes neonLoad {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+.btn-green {
+  @apply px-3 py-1 text-xs bg-green-500/20 text-green-400 rounded hover:bg-green-500/30 transition;
+}
+
+.btn-red {
+  @apply px-3 py-1 text-xs bg-red-500 text-white rounded hover:opacity-90 transition;
+}
+
+.btn-red-outline {
+  @apply px-3 py-1 text-xs border border-red-400/40 text-red-400 rounded hover:bg-red-400/10 transition;
+}
+
+.btn-yellow {
+  @apply px-3 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded hover:bg-yellow-500/30 transition;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-loading {
+  animation: loading 1.5s infinite ease-in-out;
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.animate-fade {
+  animation: fadeIn 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes bar {
+  0%, 100% {
+    transform: scaleY(0.6);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1.4);
+    opacity: 1;
+  }
+}
+
+.animate-bar {
+  animation: bar 0.8s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+.animate-pulseDot {
+  animation: pulseDot 1s ease-in-out infinite;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('/noise.png');
+  opacity: 0.03;
+  pointer-events: none;
 }
