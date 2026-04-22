@@ -8,7 +8,10 @@ import { supabase } from "@/lib/supabase/client";
 import { useBetslipStore } from "@/stores/useBetslipStore";
 
 function formatBalance(n: number) {
-  return `₦${n?.toLocaleString() ?? "0"}`;
+  return `₦${n.toLocaleString("en-NG", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
 }
 
 export function Header() {
