@@ -5,21 +5,22 @@ import { useRouter } from "next/navigation";
 import { Users, Share2, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 
+
 export default function SeasonCard({ season, referralCode }: any) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  const [now, setNow] = useState<Date | null>(null);
+  // 🔥 START NULL (prevents hydration mismatch)
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-  
+    const update = () => setNow(new Date());
+
+    update(); // run immediately after mount
+
+    const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  if (!now) return null;
 
   const regStart = new Date(season.registration_start);
   const regEnd = new Date(season.registration_end);
@@ -29,7 +30,7 @@ export default function SeasonCard({ season, referralCode }: any) {
   const isRegistrationOpen = now >= regStart && now <= regEnd;
   const isActive = now >= start && now <= end;
 
-  let label = "";
+  let label = "Starting...";
   let targetDate = season.start_date;
 
   if (isRegistrationOpen) {
@@ -38,8 +39,6 @@ export default function SeasonCard({ season, referralCode }: any) {
   } else if (isActive) {
     label = "Ends in";
     targetDate = season.end_date;
-  } else {
-    label = "Starting...";
   }
 
   const handleShare = async () => {
@@ -62,33 +61,23 @@ export default function SeasonCard({ season, referralCode }: any) {
     }
   };
 
-  const totalDuration = end.getTime() - start.getTime();
-  const elapsed = now.getTime() - start.getTime();
-
-  let progress = 0;
-
-  if (now < start) progress = 0;
-  else if (now > end) progress = 100;
-  else progress = (elapsed / totalDuration) * 100;
-
   return (
-    <div className="relative rounded-2xl p-[1px]
+    <div
+      className="relative rounded-2xl p-[1px]
       bg-gradient-to-b from-purple-500/30 via-transparent to-transparent
       hover:from-purple-500/60 transition duration-300 hover:scale-[1.01]"
     >
-
-      <div className="relative rounded-2xl p-5 space-y-4
+      <div
+        className="relative rounded-2xl p-5 space-y-4
         bg-gradient-to-br from-[#140a26] via-[#1a0f35] to-[#0c061a]
         shadow-[0_25px_80px_rgba(0,0,0,0.9)]
         before:absolute before:inset-0 before:rounded-2xl
         before:bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.18),transparent_60%)]
         after:absolute after:inset-0 after:rounded-2xl
-        after:bg-[radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.15),transparent_60%)]
-      ">
-
+        after:bg-[radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.15),transparent_60%)]"
+      >
         {/* HEADER */}
         <div className="flex justify-between items-start relative z-10">
-
           <div>
             <h2 className="text-[17px] font-semibold tracking-tight bg-gradient-to-r from-purple-200 to-white bg-clip-text text-transparent">
               {season.name}
@@ -102,51 +91,66 @@ export default function SeasonCard({ season, referralCode }: any) {
             </div>
           </div>
 
-          {/* 🔥 LIVE BADGE */}
-          <span className="relative text-[10px] px-2.5 py-1 rounded-full font-medium
+          {/* LIVE BADGE */}
+          <span
+            className="relative text-[10px] px-2.5 py-1 rounded-full font-medium
             bg-green-500/10 text-green-400 border border-green-500/30
-            shadow-[0_0_10px_rgba(34,197,94,0.5)]
-          ">
+            shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+          >
             LIVE
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping" />
           </span>
-
         </div>
 
         {/* TIMER */}
         <div className="relative z-10">
-          <p className="text-[11px] text-purple-300 mb-1">{label}</p>
+        <p className="text-[11px] text-purple-300 mb-1">
+          {now ? label : "Loading..."}
+        </p>
 
           <div className="flex">
-          <div className="inline-flex w-fit px-2 py-1 rounded-md bg-white/5 border border-white/10">
-            <div className="scale-[0.8] origin-left leading-none w-fit">
-              <div className="inline-flex w-fit">
-                <Countdown target={targetDate} />
+            <div className="inline-flex w-fit px-2 py-1 rounded-md bg-white/5 border border-white/10">
+              <div className="scale-[0.8] origin-left leading-none w-fit">
+                <div className="inline-flex w-fit">
+                  <Countdown target={targetDate} />
+                </div>
               </div>
             </div>
           </div>
         </div>
-        </div>
 
-        {/* 🔥 PROGRESS BAR (season life) */}
+        {/* 🔥 PROGRESS BAR */}
         <div className="relative z-10">
           <div className="h-[3px] bg-white/10 rounded-full overflow-hidden relative">
-          <div
+            <div
               className="h-full bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 transition-[width] duration-700 ease-out"
-              style={{ width: `${progress}%` }}
+              style={{
+                width: (() => {
+                  if (!now) return "0%"; // SSR safe
+
+                  if (now < start) return "0%";
+                  if (now > end) return "100%";
+
+                  const progress =
+                    ((now.getTime() - start.getTime()) /
+                      (end.getTime() - start.getTime())) *
+                    100;
+
+                  return `${progress.toFixed(2)}%`;
+                })(),
+              }}
             />
+
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-30" />
           </div>
         </div>
 
         {/* REWARD */}
         <div className="flex justify-between items-center relative z-10">
-
           <div>
             <p className="text-[10px] text-white/50">
               Performance Rewards
             </p>
-
             <p className="text-sm font-semibold text-purple-400 tracking-tight">
               Unlock Premium Access
             </p>
@@ -166,9 +170,7 @@ export default function SeasonCard({ season, referralCode }: any) {
 
         {/* BALANCE */}
         <div className="pt-3 border-t border-white/5 space-y-3 relative z-10">
-
           <div className="flex justify-between text-xs">
-
             <div>
               <p className="text-[10px] text-white/40">Starting Balance</p>
               <p className="text-white font-semibold">
@@ -182,12 +184,10 @@ export default function SeasonCard({ season, referralCode }: any) {
                 ₦{Number(season.drawdown_limit).toLocaleString()}
               </p>
             </div>
-
           </div>
 
           {/* ACTION ROW */}
           <div className="flex items-center justify-between pt-1">
-
             <button
               onClick={() => setOpen(!open)}
               className="flex items-center gap-1 text-xs text-purple-300 hover:text-white transition"
@@ -199,7 +199,6 @@ export default function SeasonCard({ season, referralCode }: any) {
               />
             </button>
 
-            {/* 🔥 SHARE WITH TEXT */}
             <button
               onClick={handleShare}
               className="flex items-center gap-1 text-xs text-purple-300 hover:text-white transition"
@@ -207,25 +206,24 @@ export default function SeasonCard({ season, referralCode }: any) {
               <Share2 size={14} />
               Share
             </button>
-
           </div>
-
         </div>
 
-        {/* EXPANDABLE (UNCHANGED) */}
+        {/* EXPANDABLE */}
         <div
           className={`transition-all duration-300 overflow-hidden ${
             open ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <div className="mt-3 rounded-xl bg-white/5 border border-white/10 p-4 space-y-4">
-
             <div>
               <p className="text-white font-semibold text-sm mb-1">
                 How to Participate
               </p>
               <p className="text-xs text-white/70">
-                Start with ₦{Number(season.starting_balance).toLocaleString()} and grow your balance through disciplined betting.
+                Start with ₦
+                {Number(season.starting_balance).toLocaleString()} and grow your
+                balance through disciplined betting.
               </p>
             </div>
 
@@ -251,10 +249,8 @@ export default function SeasonCard({ season, referralCode }: any) {
                 <li>All participants receive future perks</li>
               </ul>
             </div>
-
           </div>
         </div>
-
       </div>
     </div>
   );

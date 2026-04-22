@@ -239,6 +239,10 @@ function evaluateMarket(leg:any, match:any){
      return awayWin || total > 2.5
    }
 
+   if(selection==="home_or_over25"){
+    return homeWin || total > 2.5
+  }
+
  }
 
  console.log("Unsupported market", leg.market, selection)

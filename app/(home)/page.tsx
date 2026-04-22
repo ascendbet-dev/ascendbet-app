@@ -7,7 +7,7 @@ import { GlobalFloatingBetSlip } from "@/components/GlobalFloatingBetSlip";
 import { SlantedBlock } from "@/components/SlantedBlock";
 import { TopWinningBets } from "@/components/TopWinningBets";
 import { PlayModes } from "@/components/PlayModes";
-import SeasonCard from "@/components/SeasonCard";
+import SeasonCard from "@/components/SeasonCardClient";
 
 function formatBalance(n: number) {
   return `₦${n.toLocaleString(undefined, {

@@ -241,10 +241,19 @@ className={`relative rounded-md border p-2 text-xs ${
 >
 
 <button
-onClick={()=>onRemove(idx)}
-className="absolute right-2 top-1 text-danger"
+  onClick={() => onRemove(idx)}
+  className="
+    absolute right-2 top-1
+    w-6 h-6 flex items-center justify-center
+    rounded-full
+    text-sm font-bold
+    text-danger
+    bg-danger/10
+    hover:bg-danger/20
+    transition
+  "
 >
-×
+  ×
 </button>
 
 {/* CLICK TO OPEN MATCH */}
