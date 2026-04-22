@@ -137,6 +137,13 @@ serve(async (req) => {
 
       const status = event.strStatus?.toLowerCase() || "";
 
+      // 🚫 ONLY PROCESS FINISHED MATCHES
+      if (!["match finished", "finished", "ft"].some(s => status.includes(s))) {
+        console.log("⏭️ Match not finished:", externalId, status);
+        continue;
+      }
+
+      // 🚫 ALSO GUARD SCORES
       if (event.intHomeScore == null || event.intAwayScore == null) {
         console.log("⏭️ No score yet:", externalId);
         continue;

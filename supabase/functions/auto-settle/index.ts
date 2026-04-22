@@ -123,6 +123,19 @@ function evaluateMarket(leg:any, match:any){
    )
  }
 
+ /* SECOND HALF */
+
+if (leg.market === "SECOND_HALF") {
+
+  const type = selection.startsWith("over") ? "over" : "under"
+  const goalLine = parseFloat(selection.replace("over","").replace("under","")) / 10
+
+  return (
+    (type === "over" && secondHalfTotal > goalLine) ||
+    (type === "under" && secondHalfTotal < goalLine)
+  )
+}
+
  /* HANDICAP */
 
  if (leg.market === "HANDICAP") {
@@ -184,72 +197,104 @@ function evaluateMarket(leg:any, match:any){
  }
 
  /* HIGHEST HALF */
+ if (leg.market === "HIGHEST_HALF") {
 
- if(leg.market==="HIGHEST_HALF"){
+  const firstHalfTotal = htHome + htAway
 
-   const firstHalfTotal = htHome + htAway
+  if (selection === "first_half") return firstHalfTotal > secondHalfTotal
+  if (selection === "second_half") return secondHalfTotal > firstHalfTotal
+  if (selection === "equal") return firstHalfTotal === secondHalfTotal
 
-   if(selection==="first_half"){
-     return firstHalfTotal > secondHalfTotal
-   }
-
-   if(selection==="second_half"){
-     return secondHalfTotal > firstHalfTotal
-   }
-
-   return false
- }
+  return false
+}
 
  /* BOTH HALVES */
 
- if(leg.market==="BOTH_HALVES"){
+ if (leg.market === "BOTH_HALVES") {
 
-   const firstHalfTotal = htHome + htAway
+  const firstHalfTotal = htHome + htAway
 
-   if(selection==="bh_under_no"){
-     return !(firstHalfTotal < 1.5 && secondHalfTotal < 1.5)
-   }
+  const bothOver15 = firstHalfTotal >= 2 && secondHalfTotal >= 2
+  const bothUnder15 = firstHalfTotal < 2 && secondHalfTotal < 2
 
-   return false
- }
+  if (selection === "bh_over_yes") return bothOver15
+  if (selection === "bh_over_no") return !bothOver15
+
+  if (selection === "bh_under_yes") return bothUnder15
+  if (selection === "bh_under_no") return !bothUnder15
+
+  return false
+}
 
  /* COMBO */
 
- if(leg.market==="COMBO"){
+/* COMBO */
 
-   if(selection==="home_over15"){
-     return homeWin && total > 1.5
-   }
+if (leg.market === "COMBO") {
 
-   if(selection==="away_over15"){
-     return awayWin && total > 1.5
-   }
+  /* RESULT */
+  const isHome = selection.startsWith("home")
+  const isAway = selection.startsWith("away")
+  const isDraw = selection.startsWith("draw")
 
- }
+  const winCondition =
+    (isHome && homeWin) ||
+    (isAway && awayWin) ||
+    (isDraw && draw)
 
- /* WIN OR */
+  /* OVER / UNDER */
+  if (selection.includes("over15")) return winCondition && total > 1.5
+  if (selection.includes("under15")) return winCondition && total < 1.5
 
- if(leg.market==="WIN_OR"){
+  if (selection.includes("over25")) return winCondition && total > 2.5
+  if (selection.includes("under25")) return winCondition && total < 2.5
 
-   if(selection==="draw_or_gg"){
-     return draw || bothScored
-   }
+  /* BTTS */
+  if (selection.includes("btts_no")) return winCondition && !bothScored
+  if (selection.includes("btts")) return winCondition && bothScored
 
-   if(selection==="away_or_over25"){
-     return awayWin || total > 2.5
-   }
+  /* OVER/UNDER + BTTS */
+  if (selection === "over25_btts") return total > 2.5 && bothScored
+  if (selection === "over25_btts_no") return total > 2.5 && !bothScored
+  if (selection === "under25_btts") return total < 2.5 && bothScored
+  if (selection === "under25_btts_no") return total < 2.5 && !bothScored
 
-   if(selection==="home_or_over25"){
-    return homeWin || total > 2.5
-  }
-
- }
-
- console.log("Unsupported market", leg.market, selection)
-
- return false
 }
 
+/* WIN OR */
+
+if (leg.market === "WIN_OR") {
+
+  const map: Record<string, boolean> = {
+
+    /* GG */
+    home_or_gg: homeWin || bothScored,
+    away_or_gg: awayWin || bothScored,
+    draw_or_gg: draw || bothScored,
+
+    /* OVER 2.5 */
+    home_or_over25: homeWin || total > 2.5,
+    away_or_over25: awayWin || total > 2.5,
+    draw_or_over25: draw || total > 2.5,
+
+    /* UNDER 2.5 */
+    home_or_under25: homeWin || total < 2.5,
+    away_or_under25: awayWin || total < 2.5,
+    draw_or_under25: draw || total < 2.5,
+  }
+
+  if (selection in map) return map[selection]
+
+  /* HANDLE NO */
+  if (selection.endsWith("_no")) {
+    const positive = selection.replace("_no", "")
+    return !map[positive]
+  }
+
+  return false
+}
+
+}
 /* ---------------- AUTO SETTLE ---------------- */
 
 serve(async (req) => {
