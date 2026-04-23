@@ -183,7 +183,7 @@ export default async function LeaderboardPage() {
       <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide scroll-smooth will-change-scroll">
         {rest.map((row: any) => {
 
-          const isCurrentUser = row.username === username;
+          const isCurrentUser = row.user_id === user.id;
 
           const target = row.target_balance ?? 120000;
           const drawdown = row.drawdown_limit ?? 88000;
@@ -206,11 +206,17 @@ export default async function LeaderboardPage() {
           return (
             <div
               key={row.rank}
-              className={`flex items-center gap-2 px-2 py-1 rounded-lg ${
-                isCurrentUser ? "bg-accent/10" : ""
+              className={`relative flex items-center gap-2 px-2 py-2 rounded-lg ${
+                isCurrentUser
+                  ? "bg-white/[0.04] border border-purple-400/30 shadow-[0_0_10px_rgba(168,85,247,0.25)]"
+                  : "hover:bg-white/5"
               }`}
             >
-              <SlantedBlock className="w-[30px] text-center !px-1 !py-1">
+              {isCurrentUser && (
+                  <div className="absolute left-0 top-0 h-full w-[2px] bg-purple-400/70 rounded-l-md" />
+                )}
+
+              <SlantedBlock className="w-[40px] text-center !px-1 !py-1">
                 <div className="flex flex-col items-center justify-center leading-none">
                   <span className="text-xs font-semibold">{row.rank}</span>
                   <span className={`text-[8px] ${getMovementColor(row.movement)}`}>
@@ -220,8 +226,8 @@ export default async function LeaderboardPage() {
               </SlantedBlock>
 
               <SlantedBlock className="w-[110px] text-center truncate">
-              <div className="truncate">
-                {formatName(row.username)}
+              <div className="flex items-center justify-center gap-1 truncate">
+                <span className="truncate">{formatName(row.username)}</span>
               </div>
               </SlantedBlock>
 
@@ -230,7 +236,9 @@ export default async function LeaderboardPage() {
               </SlantedBlock>
 
               <SlantedBlock className="w-[60px] text-center">
-                {row.discipline_score ?? 0}
+              {row.discipline_score !== null && row.discipline_score !== undefined
+                ? row.discipline_score.toFixed(2)
+                : "—"}
               </SlantedBlock>
 
               <SlantedBlock className={`w-[90px] text-center ${badgeColor}`}>

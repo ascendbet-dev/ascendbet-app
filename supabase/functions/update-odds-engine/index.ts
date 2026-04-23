@@ -1017,7 +1017,23 @@ async function fetchSportsDBFixtures(){
     // AS Roma
     "asroma": "roma",
     "roma": "roma",
-  
+    
+    // AZ Alkmaar
+    "azalkmaar": "az",
+    "az": "az",
+
+    // PSV
+    "psveindhoven": "psv",
+    "psv": "psv",
+
+    // PEC Zwolle
+    "peczwolle": "peczwolle",
+    "zwolle": "peczwolle",
+
+    // Go Ahead Eagles
+    "goaheadeagles": "goahead",
+    "goahead": "goahead",
+
     // Hoffenheim
     "tsg1899hoffenheim": "hoffenheim",
     "hoffenheim": "hoffenheim",
@@ -1094,19 +1110,21 @@ async function fetchSportsDBFixtures(){
       .replace(/[^a-z0-9]/g,"")
   }
 
-  function getCanonicalTeam(name:string){
-
-    const cleaned = simplify(name)
+  function getCanonicalTeam(name: string) {
+    const cleaned = simplify(name);
   
-    // alias first
     if (TEAM_ALIASES[cleaned]) {
-      return TEAM_ALIASES[cleaned]
+      return TEAM_ALIASES[cleaned];
     }
   
-    // 🔥 fallback remove numbers (CRITICAL)
-    const noNumbers = cleaned.replace(/[0-9]/g, "")
+    // 🔥 NEW: partial matching fallback
+    for (const key in TEAM_ALIASES) {
+      if (cleaned.includes(key)) {
+        return TEAM_ALIASES[key];
+      }
+    }
   
-    return noNumbers
+    return cleaned.replace(/[0-9]/g, "");
   }
 
 /* ---------------- FIXTURE FETCH ---------------- */

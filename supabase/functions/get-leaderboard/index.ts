@@ -168,6 +168,7 @@ serve(async (req) => {
       const movement = previousRank - currentRank;
 
       return {
+        user_id: user.user_id,
         rank: currentRank,
         previous_rank: previousRank,
         movement, // 🔥 NEW

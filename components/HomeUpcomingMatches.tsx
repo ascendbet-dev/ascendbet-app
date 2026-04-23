@@ -72,7 +72,18 @@ export function HomeUpcomingMatches({ matches }: { matches: Match[] }) {
     return "Next";
   }
 
-  const limited = matches.slice(0, 20);
+  const seen = new Set();
+
+const uniqueMatches = matches.filter((m) => {
+  const key = `${m.home?.toLowerCase()}-${m.away?.toLowerCase()}-${new Date(m.date).toDateString()}`;
+
+  if (seen.has(key)) return false;
+
+  seen.add(key);
+  return true;
+});
+
+const limited = uniqueMatches.slice(0, 20);
 
   const grouped = {
     Today: limited.filter(m => {
