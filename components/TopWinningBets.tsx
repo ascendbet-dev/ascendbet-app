@@ -92,7 +92,7 @@ export function TopWinningBets({ initialBets }: { initialBets: any[] }) {
   return (
     <section className="mb-10 pt-3">
       <h2 className="font-semibold text-text mb-4 text-left">
-        Top Winning Bets Today
+        Top Winning Bets
       </h2>
 
       <div

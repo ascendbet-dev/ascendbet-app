@@ -6,6 +6,8 @@ import { MatchMarkets } from "./MatchMarkets";
 import type { BetSelection } from "@/lib/place-bet-types";
 import { useBetslipStore } from "@/stores/useBetslipStore";
 import { useBetslipBridge } from "@/hooks/useBetslipBridge";
+import { COUNTRY_LEAGUES } from "@/lib/league-data";
+
 
 export function HomeUpcomingMatches({ matches }: { matches: Match[] }) {
 
@@ -177,34 +179,121 @@ function oddsButton(
   );
 }
 
-  function renderMatch(m: Match) {
-    const homeOdds = m.markets?.h2h?.home;
-    const drawOdds = m.markets?.h2h?.draw;
-    const awayOdds = m.markets?.h2h?.away;
+const LEAGUE_CODE_MAP: Record<string, string> = {
+  PL: "Premier League",
+  PD: "La Liga",
+  BL1: "Bundesliga",
+  SA: "Serie A",
+  FL1: "Ligue 1",
+  DED: "Eredivisie",
+  PPL: "Primeira Liga",
+  BPL: "Belgian Pro League",
+  ELC: "England Championship",
+  TSL: "Süper Lig",
+};
 
-    return (
-      <div
-        key={m.fixture_id}
-        onClick={(e) => {
-          if ((e.target as HTMLElement).closest("button")) return;
-          openMatch(m);
-        }}
-        className="flex items-center justify-between border-t border-border px-3 py-3 cursor-pointer"
-      >
-        <div>
-          <p className="text-sm font-semibold text-white">{m.home}</p>
-          <p className="text-sm font-semibold text-white">{m.away}</p>
-          <p className="text-xs text-muted mt-1">{formatTime(m.date)}</p>
+function getLeagueCountry(league?: string) {
+  if (!league) return null;
+
+  const leagueName = LEAGUE_CODE_MAP[league] ?? league;
+
+  for (const country in COUNTRY_LEAGUES) {
+    if (COUNTRY_LEAGUES[country].includes(leagueName)) {
+      return `${country} • ${leagueName}`;
+    }
+  }
+
+  return leagueName;
+}
+
+const TOP_5_LEAGUES = [
+  "Premier League",
+  "La Liga",
+  "Bundesliga",
+  "Serie A",
+  "Ligue 1",
+];
+
+function renderMatch(m: Match) {
+  const homeOdds = m.markets?.h2h?.home;
+  const drawOdds = m.markets?.h2h?.draw;
+  const awayOdds = m.markets?.h2h?.away;
+
+  const leagueLabel = getLeagueCountry(m.league);
+  const leagueName = LEAGUE_CODE_MAP[m.league] ?? m.league;
+  const isTopLeague = TOP_5_LEAGUES.includes(leagueName);
+
+  return (
+    <div
+      key={m.fixture_id}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("button")) return;
+        openMatch(m);
+      }}
+      className="border-t border-border/60 px-2 py-3 cursor-pointer hover:bg-white/5 transition"
+    >
+      {/* 🔥 HEADER (HOT + TIME + LEAGUE) */}
+      <div className="flex items-center text-[10px] text-muted mb-1 -mx-2 pl-0">
+
+          {/* CHIP → TOUCHES WALL */}
+          <span
+  className={`
+    flex items-center gap-1 pl-1.5 pr-2 py-[2px] text-[10px] font-medium rounded
+    ${isTopLeague
+      ? "bg-gradient-to-r from-red-300/15 via-orange-500/15 to-green-500/15 border border-green-400/30 text-green-300"
+      : "bg-gradient-to-r from-red-500/15 to-orange-500/15 border border-red-400/30 text-red-300"
+    }
+  `}
+>
+  {isTopLeague ? (
+    <>
+      <span className="text-red-300">🔥</span>
+      <span className="text-red-300">HOT</span>
+      <span className="mx-[2px] text-white/30">•</span>
+      <span className="text-green-300">BEST ODDS</span>
+    </>
+  ) : (
+    <>
+      <span>🔥</span>
+      <span>HOT</span>
+    </>
+  )}
+</span>
+
+          {/* TIME */}
+          <span className="ml-2">
+            {formatTime(m.date)}
+          </span>
+
+          {/* LEAGUE → spaced + right aligned */}
+          {leagueLabel && (
+            <span className="ml-auto mr-2 text-purple-300 text-[10px] truncate">
+              {leagueLabel}
+            </span>
+          )}
+
         </div>
 
+      {/* 🧠 MAIN ROW */}
+      <div className="flex items-center justify-between">
+
+        {/* TEAMS */}
+        <div className="flex flex-col text-sm leading-tight">
+          <span className="text-white">{m.home}</span>
+          <span className="text-white">{m.away}</span>
+        </div>
+
+        {/* ODDS */}
         <div className="flex gap-2">
           {oddsButton(m, "home", homeOdds)}
           {oddsButton(m, "draw", drawOdds)}
           {oddsButton(m, "away", awayOdds)}
         </div>
+
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   function Header({ title }: { title: string }) {
     return (
