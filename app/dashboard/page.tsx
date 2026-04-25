@@ -35,14 +35,16 @@ if (!user.email_confirmed_at) {
 
 // 1. Get active season
 const { data: activeSeason } = await supabase
-.from("seasons")
-.select(`
-  id,
-  name,
-  registration_start,
-  registration_end,
-  start_date,
-  end_date
+  .from("seasons")
+  .select(`
+    id,
+    name,
+    registration_start,
+    registration_end,
+    start_date,
+    end_date,
+    starting_balance,
+    target_balance
 `)
 .eq("status", "active")
 .maybeSingle();
@@ -127,6 +129,8 @@ season = instance;
         remainingDdBuffer={remainingDdBuffer}
         progressPercent={progressPercent}
         progressColor={progressColor}
+        startingBalance={season.starting_balance}   
+        targetBalance={season.target_balance}       
       />
 
       {/* Performance Strip */}

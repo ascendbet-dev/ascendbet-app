@@ -49,29 +49,47 @@ export function HomeUpcomingMatches({ matches }: { matches: Match[] }) {
 
   function formatTime(date: string) {
     const d = new Date(date);
-    if (isNaN(d.getTime())) return "";
+  
+    if (!date || isNaN(d.getTime())) return "--:--";
+  
     return d.toLocaleTimeString([], {
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   }
 
+  function formatMatchDay(dateStr: string) {
+    const d = new Date(dateStr);
+  
+    const day = d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+  
+    const weekday = d.toLocaleDateString("en-GB", {
+      weekday: "long",
+    });
+  
+    return `${day} ${weekday}`;
+  }
+
   function getDayLabel(date: string) {
-    const d = new Date(date);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
-    const matchDay = new Date(d);
-    matchDay.setHours(0, 0, 0, 0);
-
-    if (matchDay.getTime() === today.getTime()) return "Today";
-    if (matchDay.getTime() === tomorrow.getTime()) return "Tomorrow";
-
-    return "Next";
+    const match = new Date(date);
+    const now = new Date();
+  
+    // normalize BOTH to local midnight
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const matchDay = new Date(match.getFullYear(), match.getMonth(), match.getDate());
+  
+    const diffDays = Math.round(
+      (matchDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+  
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Tomorrow";
+    if (diffDays >= 2) return "Next";
+  
+    return "Past";
   }
 
   const seen = new Set();
@@ -85,16 +103,25 @@ const uniqueMatches = matches.filter((m) => {
   return true;
 });
 
-const limited = uniqueMatches.slice(0, 20);
+const now = new Date();
 
-  const grouped = {
-    Today: limited.filter(m => {
-      const now = new Date();
-      return new Date(m.date) > now && getDayLabel(m.date) === "Today";
-    }),
-    Tomorrow: limited.filter(m => getDayLabel(m.date) === "Tomorrow"),
-    Next: limited.filter(m => getDayLabel(m.date) === "Next"),
-  };
+const sorted = uniqueMatches
+  .filter(m => {
+    if (!m.date) return false;
+
+    const d = new Date(m.date);
+
+    // ✅ valid date + not started yet
+    return !isNaN(d.getTime()) && d > now;
+  })
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+const grouped = {
+  Today: sorted.filter(m => getDayLabel(m.date) === "Today").slice(0, 20),
+  Tomorrow: sorted.filter(m => getDayLabel(m.date) === "Tomorrow").slice(0, 20),
+  Next: sorted.filter(m => getDayLabel(m.date) === "Next").slice(0, 10),
+};
+
 
   function isSelected(fixture_id: string | number, market: string, pick: string) {
     return selectionMap.has(`${fixture_id}-${market}-${pick}`);
@@ -188,8 +215,13 @@ const LEAGUE_CODE_MAP: Record<string, string> = {
   DED: "Eredivisie",
   PPL: "Primeira Liga",
   BPL: "Belgian Pro League",
-  ELC: "England Championship",
+  ELC: "Championship",
   TSL: "Süper Lig",
+  EL1: "League One",
+  EL2: "League Two",
+  CL: "UEFA Champions-League",
+  EL: "UEFA Europa League",
+  BSA: "Brasileirão Serie A",
 };
 
 function getLeagueCountry(league?: string) {
@@ -197,22 +229,61 @@ function getLeagueCountry(league?: string) {
 
   const leagueName = LEAGUE_CODE_MAP[league] ?? league;
 
+  // 🔒 ensure deterministic fallback
   for (const country in COUNTRY_LEAGUES) {
     if (COUNTRY_LEAGUES[country].includes(leagueName)) {
       return `${country} • ${leagueName}`;
     }
   }
 
-  return leagueName;
+  return leagueName; // ALWAYS same fallback
 }
 
-const TOP_5_LEAGUES = [
+const TOP_LEAGUES = [
   "Premier League",
   "La Liga",
   "Bundesliga",
   "Serie A",
   "Ligue 1",
+  "UEFA Champions League",
+  "UEFA Europa League",
 ];
+
+const [activeTab, setActiveTab] = useState<"Highlights" | "Today" | "Tomorrow" | "Next">("Today");
+
+const highlightMatches = sorted.filter(m => {
+  const leagueName = LEAGUE_CODE_MAP[m.league] ?? m.league;
+  return TOP_LEAGUES.includes(leagueName);
+});
+
+const groupedHighlightsByDate = highlightMatches.reduce((acc, match) => {
+  const dateKey = new Date(match.date).toDateString();
+
+  if (!acc[dateKey]) acc[dateKey] = [];
+  acc[dateKey].push(match);
+
+  return acc;
+}, {} as Record<string, Match[]>);
+
+const highlightDays = Object.keys(groupedHighlightsByDate).sort(
+  (a, b) => new Date(a).getTime() - new Date(b).getTime()
+);
+
+  // ✅ NEXT TAB GROUPING
+const nextMatches = sorted.filter(m => getDayLabel(m.date) === "Next");
+
+const groupedNextByDate = nextMatches.reduce((acc, match) => {
+  const dateKey = new Date(match.date).toDateString();
+
+  if (!acc[dateKey]) acc[dateKey] = [];
+  acc[dateKey].push(match);
+
+  return acc;
+}, {} as Record<string, Match[]>);
+
+const nextDays = Object.keys(groupedNextByDate).sort(
+  (a, b) => new Date(a).getTime() - new Date(b).getTime()
+);
 
 function renderMatch(m: Match) {
   const homeOdds = m.markets?.h2h?.home;
@@ -221,7 +292,7 @@ function renderMatch(m: Match) {
 
   const leagueLabel = getLeagueCountry(m.league);
   const leagueName = LEAGUE_CODE_MAP[m.league] ?? m.league;
-  const isTopLeague = TOP_5_LEAGUES.includes(leagueName);
+  const isTopLeague = TOP_LEAGUES.includes(leagueName);
 
   return (
     <div
@@ -237,28 +308,28 @@ function renderMatch(m: Match) {
 
           {/* CHIP → TOUCHES WALL */}
           <span
-  className={`
-    flex items-center gap-1 pl-1.5 pr-2 py-[2px] text-[10px] font-medium rounded
-    ${isTopLeague
-      ? "bg-gradient-to-r from-red-300/15 via-orange-500/15 to-green-500/15 border border-green-400/30 text-green-300"
-      : "bg-gradient-to-r from-red-500/15 to-orange-500/15 border border-red-400/30 text-red-300"
-    }
-  `}
->
-  {isTopLeague ? (
-    <>
-      <span className="text-red-300">🔥</span>
-      <span className="text-red-300">HOT</span>
-      <span className="mx-[2px] text-white/30">•</span>
-      <span className="text-green-300">BEST ODDS</span>
-    </>
-  ) : (
-    <>
-      <span>🔥</span>
-      <span>HOT</span>
-    </>
-  )}
-</span>
+            className={`
+              flex items-center gap-1 pl-1.5 pr-2 py-[2px] text-[10px] font-medium rounded
+              ${isTopLeague
+                ? "bg-gradient-to-r from-red-300/15 via-orange-500/15 to-green-500/15 border border-green-400/30 text-green-300"
+                : "bg-gradient-to-r from-red-500/15 to-orange-500/15 border border-red-400/30 text-red-300"
+              }
+            `}
+          >
+            {isTopLeague ? (
+              <>
+                <span className="text-red-300">🔥</span>
+                <span className="text-red-300">HOT</span>
+                <span className="mx-[2px] text-white/30">•</span>
+                <span className="text-green-300">BEST ODDS</span>
+              </>
+            ) : (
+              <>
+                <span>🔥</span>
+                <span>HOT</span>
+              </>
+            )}
+          </span>
 
           {/* TIME */}
           <span className="ml-2">
@@ -267,9 +338,12 @@ function renderMatch(m: Match) {
 
           {/* LEAGUE → spaced + right aligned */}
           {leagueLabel && (
-            <span className="ml-auto mr-2 text-purple-300 text-[10px] truncate">
-              {leagueLabel}
-            </span>
+            <span
+            suppressHydrationWarning
+            className="ml-auto mr-2 text-purple-300 text-[10px] truncate"
+          >
+            {leagueLabel}
+          </span>
           )}
 
         </div>
@@ -308,31 +382,124 @@ function renderMatch(m: Match) {
     );
   }
 
+
   return (
     <>
+    
+      {/* 🔥 TABS CONTAINER */}
+      <div className="bg-[#0c061a] rounded-xl p-2">
+
+      <div className="flex gap-2">
+
+        {["Highlights", "Today", "Tomorrow", "Next"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab as any)}
+            className={`
+              flex-1 text-center px-3 py-2 text-xs rounded-lg whitespace-nowrap transition font-medium
+              ${activeTab === tab
+                ? "bg-gradient-to-r from-purple-500 to-purple-700 text-white shadow-[0_0_12px_rgba(168,85,247,0.6)]"
+                : "text-white/60 hover:text-white hover:bg-white/10"
+              }
+            `}
+          >
+            {tab}
+          </button>
+        ))}
+
+      </div>
+
+      </div>
+
       <div className={`rounded-xl border border-border overflow-hidden ${selectedMatch ? "blur-sm" : ""}`}>
 
-        {grouped.Today.length > 0 && (
+          {activeTab === "Today" && (
+            <>
+              <Header title="Today" />
+
+              {grouped.Today.length > 0 ? (
+                grouped.Today.map(renderMatch)
+              ) : (
+                <div className="py-6 text-center text-sm text-white/50">
+                  No odds available
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "Tomorrow" && (
+            <>
+              <Header title="Tomorrow" />
+              {grouped.Tomorrow.length > 0 ? (
+                grouped.Tomorrow.map(renderMatch)
+              ) : (
+                <div className="py-6 text-center text-sm text-white/50">
+                  No odds available
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "Next" && (
+            <>
+              <Header title="Next" />
+
+              {nextDays.length > 0 ? (
+                nextDays.slice(0, 4).map((day, index) => {
+                  const matches = groupedNextByDate[day];
+
+                  return (
+                    <div key={day} className="mt-2 first:mt-0">
+                      {/* DAY HEADER */}
+                      <div className="flex items-center gap-2 px-3 py-2 bg-[#0f0820] border-t border-border/60">
+                        <div className="w-[3px] h-3 bg-purple-500 rounded-sm" />
+                        <span className="text-[11px] font-semibold text-white/80 tracking-wide">
+                          {formatMatchDay(day)}
+                        </span>
+                      </div>
+
+                      {/* MATCHES */}
+                      {matches.slice(0, index === 0 ? 10 : 3).map(renderMatch)}
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-6 text-center text-sm text-white/50">
+                  No odds available
+                </div>
+              )}
+            </>
+          )}
+
+        {activeTab === "Highlights" && (
           <>
-            <Header title="Today" />
-            {grouped.Today.map(renderMatch)}
+            <Header title="Highlights" />
+
+            {highlightDays.length > 0 ? (
+              highlightDays.slice(0, 3).map((day) => (
+                <div key={day} className="mt-2 first:mt-0">
+                  
+                  {/* DAY HEADER */}
+                  <div className="flex items-center gap-2 px-3 py-2 bg-[#0f0820] border-t border-border/60">
+                    <div className="w-[3px] h-3 bg-purple-500 rounded-sm" />
+                    <span className="text-[11px] font-semibold text-white/80 tracking-wide">
+                      {formatMatchDay(day)}
+                    </span>
+                  </div>
+
+                  {/* MATCHES */}
+                  {groupedHighlightsByDate[day].slice(0, 5).map(renderMatch)}
+
+                </div>
+              ))
+            ) : (
+              <div className="py-6 text-center text-sm text-white/50">
+                No odds available
+              </div>
+            )}
           </>
         )}
-
-        {grouped.Tomorrow.length > 0 && (
-          <>
-            <Header title="Tomorrow" />
-            {grouped.Tomorrow.map(renderMatch)}
-          </>
-        )}
-
-        {grouped.Next.length > 0 && (
-          <>
-            <Header title="Next" />
-            {grouped.Next.map(renderMatch)}
-          </>
-        )}
-
+        
       </div>
 
       {selectedMatch && (

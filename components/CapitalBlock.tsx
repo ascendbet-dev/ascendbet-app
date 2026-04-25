@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { Info } from "lucide-react";
 
-function formatBalance(n: number) {
+function formatBalance(n?: number) {
+  if (typeof n !== "number") return "₦0";
+
   return `₦${n.toLocaleString("en-NG", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
@@ -16,14 +18,20 @@ export default function CapitalBlock({
   remainingDdBuffer,
   progressPercent,
   progressColor,
+  startingBalance,      
+  targetBalance,        
 }: {
   balance: number;
   remainingToTarget: number;
   remainingDdBuffer: number;
   progressPercent: number;
   progressColor: string;
+  startingBalance: number;   
+  targetBalance: number;     
 }) {
   const [showInfo, setShowInfo] = useState(false);
+
+  const isComplete = progressPercent >= 100;
 
   // Close tooltip on outside click
   useEffect(() => {
@@ -105,23 +113,36 @@ export default function CapitalBlock({
       </div>
 
       {/* Progress */}
+      
       <div className="mt-3">
         <div className="flex justify-end">
-          <span className="text-[10px] tabular-nums text-muted">
-            {Math.round(progressPercent)}%
-          </span>
+
+        <span
+          className={`text-[10px] tabular-nums ${
+            isComplete ? "text-purple-300" : "text-muted"
+          }`}
+        >
+          {Math.round(progressPercent)}%
+        </span>
+
         </div>
 
         <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-border">
-          <div
-            className={`h-full rounded-full transition-[width] duration-[var(--duration-normal)] ease-[var(--ease)] ${progressColor}`}
+        <div
+            className={`
+              h-full rounded-full transition-[width] duration-[var(--duration-normal)] ease-[var(--ease)]
+              ${progressColor}
+              ${isComplete ? "shadow-[0_0_12px_rgba(168,85,247,0.7)] animate-pulse" : ""}
+            `}
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
         <div className="mt-1 flex justify-between text-[10px] text-muted">
-          <span>100k</span>
-          <span>120k</span>
+
+        <span>{formatBalance(startingBalance)}</span>
+        <span>{formatBalance(targetBalance)}</span>
+
         </div>
       </div>
     </section>

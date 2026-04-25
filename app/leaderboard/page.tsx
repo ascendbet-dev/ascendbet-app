@@ -46,7 +46,7 @@ export default async function LeaderboardPage() {
 
   const { data: activeSeason } = await supabase
     .from("seasons")
-    .select("id, name, status")
+    .select("id, name, status, target_balance, starting_balance, drawdown_limit")
     .eq("status", "active")
     .maybeSingle();
 
@@ -55,7 +55,7 @@ export default async function LeaderboardPage() {
   } else {
     const { data: lastSeason } = await supabase
       .from("seasons")
-      .select("id, name, status")
+      .select("id, name, status, target_balance, starting_balance, drawdown_limit")
       .eq("status", "completed")
       .order("end_date", { ascending: false })
       .limit(1)
@@ -124,8 +124,8 @@ export default async function LeaderboardPage() {
           const isFirst = row.rank === 1;
           const isSecond = row.rank === 2;
 
-          const target = row.target_balance ?? 120000;
-          const drawdown = row.drawdown_limit ?? 88000;
+          const target = season?.target_balance ?? 0;
+          const drawdown = season?.drawdown_limit ?? 0;
 
           let badge = "Contender";
           let badgeColor = "text-white";
@@ -185,13 +185,13 @@ export default async function LeaderboardPage() {
 
           const isCurrentUser = row.user_id === user.id;
 
-          const target = row.target_balance ?? 120000;
-          const drawdown = row.drawdown_limit ?? 88000;
+          const target = season?.target_balance ?? 0;
+          const drawdown = season?.drawdown_limit ?? 0;
 
           let badge = "Contender";
           let badgeColor = "text-white";
 
-          if (row.is_disqualified) {
+          if (row.is_disqualified || row.current_balance <= drawdown) {
             badge = "Eliminated";
             badgeColor = "text-red-400";
           } else if (row.current_balance >= target) {

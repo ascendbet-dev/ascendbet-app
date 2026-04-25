@@ -44,10 +44,23 @@ export default async function HomePage() {
   const { matches } = await matchesRes.json();
 
   const upcomingMatches =
-  matches?.map((m: any) => ({
-    ...m, // 🔥 KEEP EVERYTHING
-    date: m.commence_time || m.date, // normalize date only
-  })).slice(0, 20) || [];
+  matches?.map((m: any) => {
+    const rawDate = m.commence_time || m.date;
+
+    let normalizedDate = null;
+
+    if (rawDate) {
+      const parsed = new Date(rawDate);
+      if (!isNaN(parsed.getTime())) {
+        normalizedDate = parsed.toISOString();
+      }
+    }
+
+    return {
+      ...m,
+      date: normalizedDate, // ✅ safe
+    };
+  }) || [];
 
 /* ---------------- WINNING BETS (FIXED) ---------------- */
 
@@ -130,16 +143,6 @@ const formattedWinningBets =
       {/* ---------------- UPCOMING MATCHES ---------------- */}
       <section className="space-y-3">
 
-        <div className="flex justify-between items-center">
-          <h2 className="font-semibold text-text">
-            Upcoming Matches
-          </h2>
-
-          <Link href="/place-bet" className="text-xs text-accent">
-            View All
-          </Link>
-        </div>
-
         <HomeUpcomingMatches matches={upcomingMatches} />
       </section>
 
@@ -161,28 +164,27 @@ const formattedWinningBets =
 
         <div className="rounded-xl border border-border bg-surface">
 
-          <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-2 text-[11px]">
+        <SlantedBlock variant="header" className="w-[32px] flex-shrink-0">
+          POS
+        </SlantedBlock>
 
-            <SlantedBlock variant="header" className="w-[40px]">
-              POS
-            </SlantedBlock>
+        <SlantedBlock variant="header" className="flex-1 min-w-0 truncate">
+          PLAYER
+        </SlantedBlock>
 
-            <SlantedBlock variant="header" className="w-[110px]">
-              PLAYER
-            </SlantedBlock>
+        <SlantedBlock variant="header" className="w-[80px] flex-shrink-0">
+          BAL
+        </SlantedBlock>
 
-            <SlantedBlock variant="header" className="w-[90px]">
-              BAL
-            </SlantedBlock>
+        <SlantedBlock variant="header" className="w-[55px] flex-shrink-0">
+          SCORE
+        </SlantedBlock>
 
-            <SlantedBlock variant="header" className="w-[60px]">
-              SCORE
-            </SlantedBlock>
-
-            <SlantedBlock variant="header" className="w-[90px]">
-              BADGE
-            </SlantedBlock>
-
+        <SlantedBlock variant="header" className="w-[85px] flex-shrink-0">
+          BADGE
+        </SlantedBlock>
+            
           </div>
 
           {top10.map((row: any) => {
@@ -190,8 +192,8 @@ const formattedWinningBets =
               row.username.charAt(0).toUpperCase() +
               row.username.slice(1).toLowerCase();
 
-            const target = row.target_balance ?? 120000;
-            const drawdown = row.drawdown_limit ?? 88000;
+              const target = season?.target_balance ?? 0;
+              const drawdown = season?.drawdown_limit ?? 0;
 
             let badge = "Contender";
             let badgeColor = "text-white";
@@ -211,23 +213,23 @@ const formattedWinningBets =
             return (
               <div key={row.rank} className="flex items-center gap-2 py-1">
 
-                <SlantedBlock className="w-[40px]">
+                <SlantedBlock className="w-[32px] flex-shrink-0">
                   {row.rank}
                 </SlantedBlock>
 
-                <SlantedBlock className="w-[110px] text-center truncate">
+                <SlantedBlock className="flex-1 min-w-0 text-center truncate">
                   {name}
                 </SlantedBlock>
 
-                <SlantedBlock className={`w-[90px] text-center ${balanceColor}`}>
+                <SlantedBlock className={`w-[80px] flex-shrink-0 text-center ${balanceColor}`}>
                   {formatBalance(row.current_balance)}
                 </SlantedBlock>
 
-                <SlantedBlock className="w-[60px] text-center">
+                <SlantedBlock className="w-[55px] flex-shrink-0 text-center">
                   {row.discipline_score}
                 </SlantedBlock>
 
-                <SlantedBlock className={`w-[90px] text-center normal-case ${badgeColor}`}>
+                <SlantedBlock className={`w-[85px] flex-shrink-0 text-center normal-case truncate whitespace-nowrap ${badgeColor}`}>
                   {badge}
                 </SlantedBlock>
 
