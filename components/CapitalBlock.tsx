@@ -98,7 +98,7 @@ export default function CapitalBlock({
 
       <div className="flex items-baseline gap-4 text-xs">
         <div className="flex items-baseline gap-1">
-          <span className="text-muted">To target</span>
+          <span className="text-muted">Become Pro</span>
           <span className="font-semibold text-success tabular-nums">
             +{formatBalance(remainingToTarget)}
           </span>

@@ -312,9 +312,12 @@ if (newBalance < DRAW_DOWN_LIMIT) {
     /* ---------- UPDATE BALANCE ---------- */
 
     await supabaseAdmin
-    .from("season_instances")
-    .update({ current_balance: newBalance })
-    .eq("id", season.id)
+      .from("season_instances")
+      .update({
+        current_balance: newBalance,
+        last_bet_at: new Date().toISOString(), // 🔥 RESET TIMER
+      })
+      .eq("id", season.id)
 
     return new Response(JSON.stringify({
       success: true,

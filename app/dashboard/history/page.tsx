@@ -198,7 +198,14 @@ export default function SeasonHistoryPage() {
                     <Stat label="Discipline Score" value={season.discipline_score} />
                     <Stat label="Settled Bets" value={season.settled_bet_count} />
 
-                    <Stat label="Avg Odds" value={season.average_odds} />
+                    <Stat
+                      label="Avg Odds"
+                      value={
+                        season.average_odds !== null && season.average_odds !== undefined
+                          ? Number(season.average_odds).toFixed(2)
+                          : "-"
+                      }
+                    />
                     <Stat label="Avg Stake" value={`₦${Number(season.average_stake).toLocaleString()}`} />
                     <Stat label="Active Days" value={season.active_betting_days} />
 

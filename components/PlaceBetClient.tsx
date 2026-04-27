@@ -32,9 +32,10 @@ export function PlaceBetClient({ balance, seasonInstanceId }: Props) {
   const [loadingMatches, setLoadingMatches] = useState(true);
 
   // ✅ SINGLE STATE SYSTEM
-  const initialState = typeof window !== "undefined"
-  ? JSON.parse(localStorage.getItem("placebet_state") || "{}")
-  : {}
+  const initialState =
+  typeof window !== "undefined" && !window.location.search.includes("fresh=1")
+    ? JSON.parse(localStorage.getItem("placebet_state") || "{}")
+    : {};
 
   const [activeLeague, setActiveLeague] = useState<string | null>(
     initialState.activeLeague || null
@@ -52,7 +53,10 @@ export function PlaceBetClient({ balance, seasonInstanceId }: Props) {
   const setSelections = useBetslipStore((s) => s.setSelections);
 
   const searchParams = useSearchParams();
+  const fresh = searchParams.get("fresh");
   const fixtureFromUrl = searchParams.get("fixture");
+
+
   const [openingFromExternal, setOpeningFromExternal] = useState(false);
   const scrollPositions = useRef<Record<string, number>>({});
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -78,6 +82,10 @@ export function PlaceBetClient({ balance, seasonInstanceId }: Props) {
 
   const [seasonEnd, setSeasonEnd] = useState<string | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
+
+  const [pulling, setPulling] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [canPull, setCanPull] = useState(false);
 
   /* ---------------- FETCH MATCHES ---------------- */
 
@@ -268,6 +276,20 @@ export function PlaceBetClient({ balance, seasonInstanceId }: Props) {
     }
   }, [selectedMatch])
 
+  useEffect(() => {
+    if (fresh === "1") {
+      // 🔥 RESET STATE
+      setActiveLeague(null);
+      setViewMode("leagues");
+  
+      // 🔥 CLEAR OLD STATE
+      localStorage.removeItem("placebet_state");
+  
+      // 🔥 CLEAN URL (VERY IMPORTANT)
+      router.replace("/place-bet");
+    }
+  }, [fresh]);
+
   /* ---------------- PLACE BET ---------------- */
 
   async function handlePlaceBet(stake: number) {
@@ -341,9 +363,50 @@ export function PlaceBetClient({ balance, seasonInstanceId }: Props) {
 
       {/* MAIN */}
       <div
-  ref={scrollRef}
-  className="flex flex-col gap-3 h-[calc(100vh-100px)] overflow-y-auto no-scrollbar"
->
+        ref={scrollRef}
+        className="flex flex-col gap-0.2 h-[calc(100dvh-100px)] overflow-y-auto no-scrollbar"
+
+        onTouchStart={(e) => {
+          if (scrollRef.current?.scrollTop === 0) {
+            setStartY(e.touches[0].clientY);
+            setCanPull(true);
+          } else {
+            setCanPull(false);
+          }
+        }}
+        
+        onTouchMove={(e) => {
+          if (!canPull) return;
+        
+          const currentY = e.touches[0].clientY;
+        
+          if (currentY - startY > 70) {
+            setPulling(true);
+          }
+        
+          if (currentY - startY < 30) {
+            setPulling(false);
+          }
+        }}
+        
+        onTouchEnd={() => {
+          if (pulling && canPull) {
+            router.refresh();
+          }
+        
+          setPulling(false);
+          setCanPull(false);
+        }}
+      >
+        <div className="relative">
+        <div
+          className={`absolute top-0 left-0 right-0 text-center text-xs transition-all duration-200 ${
+            pulling ? "opacity-100 translate-y-0 text-purple-400" : "opacity-0 -translate-y-2"
+          }`}
+        >
+          Release to refresh...
+        </div>
+      </div>
 
         {/* LEAGUES */}
         {viewMode === "leagues" && (

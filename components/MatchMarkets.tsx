@@ -227,7 +227,7 @@ export function MatchMarkets({
 
      {/* MODAL */}
      <div className="fixed bottom-[52px] left-1/2 -translate-x-1/2 w-full max-w-[420px] z-50 flex items-end">
-     <div className="w-full h-[calc(100vh-109px)] px-2 bg-bg-primary border border-border rounded-2xl overflow-hidden">
+     <div className="w-full h-[calc(100dvh-109px)] px-2 bg-bg-primary border border-border rounded-2xl overflow-hidden">
 
         {/* HEADER */}
 
@@ -250,7 +250,7 @@ export function MatchMarkets({
 
         <div 
         data-scroll-container
-        className="h-[75vh] overflow-y-auto scrollbar-hide p-4 pb-10">
+        className="flex-1 overflow-y-auto scrollbar-hide p-4 pb-10">
 
           {/* MATCH WINNER */}
 

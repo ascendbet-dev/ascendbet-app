@@ -94,7 +94,7 @@ export default async function LeaderboardPage() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="mx-auto max-w-lg h-[calc(100vh-100px)] px-4 py-4 flex flex-col">
+    <div className="mx-auto max-w-lg h-[calc(100vh-100px)] px-4 py-4 flex flex-col overflow-hidden">
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4 shrink-0">
@@ -180,7 +180,7 @@ export default async function LeaderboardPage() {
       </div>
 
       {/* REST */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-hide scroll-smooth will-change-scroll">
+      <div className="flex-1 overflow-y-auto overscroll-contain space-y-3 pr-1 scrollbar-hide scroll-smooth">
         {rest.map((row: any) => {
 
           const isCurrentUser = row.user_id === user.id;
@@ -231,19 +231,20 @@ export default async function LeaderboardPage() {
               </div>
               </SlantedBlock>
 
-              <SlantedBlock className={`w-[90px] text-center ${balanceColor}`}>
+              <SlantedBlock className={`w-[90px] !px-0 flex items-center justify-center ${balanceColor}`}>
                 {formatBalance(row.current_balance)}
               </SlantedBlock>
 
-              <SlantedBlock className="w-[60px] text-center">
+              <SlantedBlock className="w-[60px] !px-0 flex items-center justify-center">
               {row.discipline_score !== null && row.discipline_score !== undefined
                 ? row.discipline_score.toFixed(2)
                 : "—"}
               </SlantedBlock>
-
-              <SlantedBlock className={`w-[90px] text-center ${badgeColor}`}>
+              
+              <SlantedBlock className={`w-[90px] !px-0 flex items-center justify-center ${badgeColor}`}>
                 {badge}
               </SlantedBlock>
+
 
             </div>
           );

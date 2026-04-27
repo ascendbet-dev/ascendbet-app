@@ -52,20 +52,30 @@ export function Countdown({ target }: { target: string }) {
   }
 
   return (
-    <div className="flex items-center justify-center gap-2 text-white">
-      {["d", "h", "m", "s"].map((k) => (
-        <div
-          key={k}
-          className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-[#140a26] border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]"
-        >
-          <span className="text-sm font-semibold">
-            {time[k as keyof typeof time]}
-          </span>
-          <span className="text-[10px] text-muted uppercase">
-            {k}
-          </span>
-        </div>
-      ))}
+    <div className="w-full flex justify-center">
+      <div className="flex items-center justify-center gap-2 sm:gap-3">
+        {["d", "h", "m", "s"].map((k) => (
+          <div
+            key={k}
+            className="
+              flex flex-col items-center justify-center
+              w-12 h-12 sm:w-14 sm:h-14
+              rounded-lg
+              bg-[#140a26]
+              border border-purple-500/20
+              shadow-[0_0_10px_rgba(168,85,247,0.2)]
+            "
+          >
+            <span className="text-sm sm:text-base font-semibold text-white">
+              {time[k as keyof typeof time]}
+            </span>
+  
+            <span className="text-[9px] sm:text-[10px] text-muted uppercase">
+            { k === "d" ? "D" : k === "h" ? "H" : k === "m" ? "M" : "S" }
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
