@@ -227,7 +227,7 @@ export function MatchMarkets({
 
      {/* MODAL */}
      <div className="fixed bottom-[52px] left-1/2 -translate-x-1/2 w-full max-w-[420px] z-50 flex items-end">
-     <div className="w-full h-[calc(100dvh-109px)] px-2 bg-bg-primary border border-border rounded-2xl overflow-hidden">
+     <div className="w-full h-[calc(100dvh-109px)] px-2 bg-bg-primary border border-border rounded-2xl flex flex-col">
 
         {/* HEADER */}
 

@@ -181,7 +181,12 @@ function expectedGoals(
   goalBias:number
 ){
 
-  const baseAdv = 50
+  let baseAdv = 50
+
+// 🔥 UCL HOME ADVANTAGE REDUCTION
+if (league === "CL") {
+  baseAdv = 20
+}
 
 // 🔥 reduce home advantage when mismatch is large
 const strengthGap = Math.abs(home - away)
@@ -214,7 +219,7 @@ let tempoBase = (tempoMap[league] ?? 2.6)
 
 // 🔥 UCL HARD CONTROL
 if (league === "CL") {
-  tempoBase *= 0.80   // stronger cut
+  tempoBase *= 0.92   // stronger cut
 }
 
   // 🔥 team strength effect
@@ -246,14 +251,19 @@ if (league === "CL") {
 
   // 🔥 UCL: reduce attacking inflation
 if (league === "CL") {
-  baseTotal *= 0.82
+  baseTotal *= 0.95
 }
 
     // 🔥 SAFE GOAL BIAS (NO EXPLOSION)
   const cappedBias = Math.max(-0.08, Math.min(0.08, goalBias))
   baseTotal *= (1 + cappedBias)
 
-  const homeShare = 1 / (1 + Math.exp(-diff / 400))
+  let homeShare = 1 / (1 + Math.exp(-diff / 400))
+
+if (league === "CL") {
+  homeShare = 1 / (1 + Math.exp(-diff / 650))
+  homeShare *= 0.97   // 🔥 VERY IMPORTANT
+}
 
   const homeXG = baseTotal * homeShare
   const awayXG = baseTotal * (1 - homeShare)
@@ -337,6 +347,13 @@ function totals(matrix:number[][], league:string){
   over35 /= totalProb
   over45 /= totalProb
 
+  if (league === "CL") {
+    const target15 = 0.72
+    const diff15 = target15 - over15
+  
+    over15 = safe(over15 + diff15 * 0.7)
+  }
+
   return {
     over05, under05:1-over05,
     over15, under15:1-over15,
@@ -344,6 +361,7 @@ function totals(matrix:number[][], league:string){
     over35, under35:1-over35,
     over45, under45:1-over45
   }
+
 }
 
 /* ---------------- BTTS ---------------- */
